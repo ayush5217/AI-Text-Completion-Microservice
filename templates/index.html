@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Completion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Text Completion!</h1>
+        <form id="completionForm">
+            <label for="textInput">Enter your text:</label>
+            <textarea id="textInput" name="text" placeholder="Enter your text here..." required></textarea>
+            <button type="submit">Complete</button>
+        </form>
+        <div id="loading" style="display: none;"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        document.getElementById("completionForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            completeSentence();
+        });
+
+        function completeSentence() {
+            var text = document.getElementById("textInput").value;
+            document.getElementById("loading").style.display = "block"; // Show loading indicator
+            fetch('/v1/yourchosenmodel/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({text: text})
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("output").innerText = data.completed_text;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                document.getElementById("loading").style.display = "none"; // Hide loading indicator when request is complete
+            });
+        }
+    </script>
+</body>
+</html>
